@@ -21,6 +21,8 @@ namespace DNASequencer
                     });
                 }
             }
+            var realFileName = fileName.Substring(fileName.LastIndexOf('.')+1);
+            N = int.Parse(realFileName.Split(new List<char> { '+', '-' }.ToArray())[0]) + this[0].Sequence.Length - 1;
         }
 
         public void MakeEmptyArrowsBetweenVertices()
