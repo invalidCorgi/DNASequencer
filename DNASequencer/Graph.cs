@@ -31,23 +31,25 @@ namespace DNASequencer
             {
                 for (int j = i + 1; j < Count; j++)
                 {
-                    for (int k = 0; k < this[i].Sequence.Length; k++)
+                    for (int k = this[i].Sequence.Length; k > 0; k--)
                     {
-                        if (this[i].Sequence.EndsWith(this[j].Sequence.Substring(k)))
+                        if (this[i].Sequence.EndsWith(this[j].Sequence.Substring(0,k)))
                         {
+                            Console.WriteLine(this[i].Sequence);
+                            Console.WriteLine(this[i].Sequence);
                             Arrow arrow = new Arrow();
                             arrow.From = this[i];
                             arrow.To = this[j];
-                            arrow.Distance = k;
+                            arrow.Distance = this[i].Sequence.Length - k;
                             this[j].Predecessors.Add(arrow);
                             this[i].Successors.Add(arrow);
                         }
-                        if (this[j].Sequence.EndsWith(this[i].Sequence.Substring(k)))
+                        if (this[j].Sequence.EndsWith(this[i].Sequence.Substring(0,k)))
                         {
                             Arrow arrow = new Arrow();
                             arrow.From = this[j];
                             arrow.To = this[i];
-                            arrow.Distance = k;
+                            arrow.Distance = this[i].Sequence.Length - k;
                             this[i].Predecessors.Add(arrow);
                             this[j].Successors.Add(arrow);
                         }
