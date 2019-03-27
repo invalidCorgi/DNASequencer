@@ -1,14 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace DNASequencer
 {
     class Graph : List<Vertex>
     {
-        public void LoadVerticesFromFile()
+        public int N { get; set; }
+        public void LoadVerticesFromFile(string fileName)
         {
-            throw new NotImplementedException();
+            using (var reader = new StreamReader(fileName))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    Add(new Vertex
+                    {
+                        Sequence = line
+                    });
+                }
+            }
         }
 
         public void MakeEmptyArrowsBetweenVertices()
