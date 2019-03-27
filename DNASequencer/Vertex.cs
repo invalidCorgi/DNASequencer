@@ -7,9 +7,9 @@ namespace DNASequencer
     class Vertex
     {
         public string Sequence { get; set; }
-        public IEnumerable<Vertex> Predecessors { get; set; }
-        public IEnumerable<Vertex> Successors { get; set; }
-        public int Visited { get; set; }
+        public List<Arrow> Predecessors { get; set; } = new List<Arrow>();
+        public List<Arrow> Successors { get; set; } = new List<Arrow>();
+        public int Visited { get; set; } = 0;
 
         public Vertex FindNextVertex()
         {
