@@ -6,7 +6,7 @@ namespace DNASequencer
 {
     class Solution
     {
-        public IEnumerable<Vertex> Vertices { get; set; }
+        public List<Vertex> Vertices { get; set; } = new List<Vertex>();
         public string Sequence { get; set; }
         public int Length {
             get
