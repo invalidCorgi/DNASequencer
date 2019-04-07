@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace DNASequencer
@@ -8,10 +9,10 @@ namespace DNASequencer
     {
         public List<Vertex> Vertices { get; set; } = new List<Vertex>();
         public string Sequence { get; set; }
-        public int Length {
+        public int UsedVerticesCount {
             get
             {
-                return Sequence.Length;
+                return Vertices.Distinct().Count();
             }
         }
     }

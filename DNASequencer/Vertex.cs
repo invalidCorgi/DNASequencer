@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using MoreLinq;
 
 namespace DNASequencer
 {
@@ -14,12 +15,10 @@ namespace DNASequencer
 
         public Arrow FindNext()
         {
-            var successors = Successors.Select(x => new
-            {
-                x,
-                Weight = x.Weight + Graph.DWeight * Visited + x.To.Successors.Select(y => y.Weight + Graph.DWeight * y.To.Visited).Max(y => y)
-            });
-            return successors.Where(x => x.Weight == successors.Max(y => y.Weight)).Select(x => x.x).First();
+            return Successors
+                    .MaxBy(x => x.Weight + Graph.DWeight * Visited
+                        + x.To.Successors.Select(y => y.Weight + Graph.DWeight * y.To.Visited).Max())
+                    .First();
         }
     }
 }

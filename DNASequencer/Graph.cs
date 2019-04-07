@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Linq;
+using MoreLinq;
 
 namespace DNASequencer
 {
@@ -87,15 +88,10 @@ namespace DNASequencer
             }
         }
 
-        public Solution SolveProblem()
+        public Solution SolveProblem(string startingVertexSequence)
         {
             var solution = new Solution();
-            var temp = this.Select(x => new
-            {
-                x,
-                pred = x.Predecessors.Where(y => y.Distance <= L / 2).Count()
-            });
-            var startingVertex = temp.Where(x => x.pred == temp.Min(y => y.pred)).Select(x => x.x).First();
+            var startingVertex = this.Where(x => x.Sequence == startingVertexSequence).First();
             solution.Vertices.Add(startingVertex);
             solution.Sequence = startingVertex.Sequence;
             startingVertex.Visited++;
@@ -103,15 +99,14 @@ namespace DNASequencer
             {
                 var lastAddedVertex = solution.Vertices.Last();
                 var arrowToNextVertex = lastAddedVertex.FindNext();
-                solution.Vertices.Add(arrowToNextVertex.To);
-                solution.Sequence += arrowToNextVertex.To.Sequence.Substring(L - arrowToNextVertex.Distance);
-                arrowToNextVertex.To.Visited++;
-                if(solution.Length > N)
+                if (arrowToNextVertex != null && arrowToNextVertex.Distance + solution.Sequence.Length <= N)
                 {
-                    lastAddedVertex = arrowToNextVertex.To;
-                    solution.Vertices.RemoveAt(solution.Vertices.Count - 1);
-                    solution.Sequence = solution.Sequence.Remove(solution.Sequence.Length - arrowToNextVertex.Distance);
-                    break;
+                    solution.Vertices.Add(arrowToNextVertex.To);
+                    solution.Sequence += arrowToNextVertex.To.Sequence.Substring(L - arrowToNextVertex.Distance);
+                    arrowToNextVertex.To.Visited++;
+                }
+                else
+                {
                     Vertex last;
                     while((last = solution.Vertices.Last()).Visited > 1)
                     {
@@ -119,31 +114,33 @@ namespace DNASequencer
                         var arrow = beforeLast.Successors.Where(x => x.To == last).First();
                         solution.Vertices.RemoveAt(solution.Vertices.Count - 1);
                         solution.Sequence = solution.Sequence.Remove(solution.Sequence.Length - arrow.Distance);
+                        last.Visited--;
                     }
                     if (solution.Sequence.Length + L > N)
                         break;
-                    var newVertex = this.Where(x => x.Visited == 0 && x.Successors.Where(y => y.To.Visited == 0).Count() > 0).FirstOrDefault();
-                    if(newVertex == null)
+                    var newVertexCandidates = this.Where(x => x.Visited == 0 && x.Successors.Where(y => y.To.Visited == 0).Count() > 0);
+                    if(newVertexCandidates.Count() == 0)
                     {
-                        bool b = false;
+                        bool zeroNotVisited = false;
                         while(solution.Sequence.Length + L <= N)
                         {
-                            var a = this.Where(x => x.Visited == 0).FirstOrDefault();
-                            if(a != null)
+                            var notVisitedVertex = this.Where(x => x.Visited == 0).FirstOrDefault();
+                            if(notVisitedVertex != null)
                             {
-                                solution.Vertices.Add(a);
-                                solution.Sequence += a.Sequence;
-                                a.Visited++;
+                                solution.Vertices.Add(notVisitedVertex);
+                                solution.Sequence += notVisitedVertex.Sequence;
+                                notVisitedVertex.Visited++;
                             }
                             else
                             {
-                                b = true;
+                                zeroNotVisited = true;
                                 break;
                             }
                         }
-                        if (b)
+                        if (zeroNotVisited)
                             break;
                     }
+                    var newVertex = newVertexCandidates.MaxBy(x => x.Successors.Where(y => y.To.Visited == 0).Max(y => y.Weight + y.To.Visited)).First();
                     solution.Vertices.Add(newVertex);
                     solution.Sequence += newVertex.Sequence;
                     newVertex.Visited++;
@@ -154,9 +151,11 @@ namespace DNASequencer
 
         public Graph Copy()
         {
-            var graph = new Graph(AWeight, BWeight, CWeight, DWeight);
-            graph.N = this.N;
-            graph.L = this.L;
+            var graph = new Graph(AWeight, BWeight, CWeight, DWeight)
+            {
+                N = this.N,
+                L = this.L
+            };
             foreach (var vertex in this)
             {
                 graph.Add(new Vertex
