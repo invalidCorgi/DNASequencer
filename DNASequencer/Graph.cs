@@ -87,7 +87,7 @@ namespace DNASequencer
             }
         }
 
-        public void SolveProblem()
+        public Solution SolveProblem()
         {
             var solution = new Solution();
             var temp = this.Select(x => new
@@ -111,6 +111,7 @@ namespace DNASequencer
                     lastAddedVertex = arrowToNextVertex.To;
                     solution.Vertices.RemoveAt(solution.Vertices.Count - 1);
                     solution.Sequence = solution.Sequence.Remove(solution.Sequence.Length - arrowToNextVertex.Distance);
+                    break;
                     Vertex last;
                     while((last = solution.Vertices.Last()).Visited > 1)
                     {
@@ -148,7 +149,47 @@ namespace DNASequencer
                     newVertex.Visited++;
                 }
             }
-            Console.WriteLine("lel");
+            return solution;
+        }
+
+        public Graph Copy()
+        {
+            var graph = new Graph(AWeight, BWeight, CWeight, DWeight);
+            graph.N = this.N;
+            graph.L = this.L;
+            foreach (var vertex in this)
+            {
+                graph.Add(new Vertex
+                {
+                    Sequence = vertex.Sequence
+                });
+            }
+            for (int i = 0; i < this.Count; i++)
+            {
+                var original = this[i];
+                var copy = graph[i];
+                foreach (var arrow in original.Predecessors)
+                {
+                    copy.Predecessors.Add(new Arrow
+                    {
+                        Distance = arrow.Distance,
+                        Weight = arrow.Weight,
+                        To = copy,
+                        From = graph.Where(x => x.Sequence == arrow.From.Sequence).First()
+                    });
+                }
+                foreach (var arrow in original.Successors)
+                {
+                    copy.Successors.Add(new Arrow
+                    {
+                        Distance = arrow.Distance,
+                        Weight = arrow.Weight,
+                        From = copy,
+                        To = graph.Where(x => x.Sequence == arrow.To.Sequence).First()
+                    });
+                }
+            }
+            return graph;
         }
     }
 }
